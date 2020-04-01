@@ -1,0 +1,185 @@
+---
+title: "Aggregated Cyber Power Index"
+author: "Belfer Cyber Initiative"
+date: "3/31/2020"
+output: html_document
+---
+
+<!-- https://rmarkdown.rstudio.com/lesson-1.html -->
+
+## Setup
+
+<!-- ### 10 STEP APPRAOCH:   -->
+
+<!-- 1. Concept definition -->
+<!-- 2. Indicator selection -->
+<!-- 3. Data treatment and analysis -->
+<!--   * inputation of missing values -->
+<!--   * log linear inputation? -->
+<!-- 4. Normalization -->
+<!-- 5. Weighting -->
+<!-- 6. Aggregating indicators -->
+<!-- 7. Statistical and conceptual coherence -->
+<!-- 8. Uncertanity and sensitivity analysis -->
+<!-- 9. Making sense of the data -->
+<!-- 10. Visualization -->
+
+### Compind Package
+This script is based mainly on the R Compind package (https://cran.r-project.org/web/packages/Compind/index.html).
+The package is used to normalize and aggregate indicators.  
+Note regarding the terminology: "composite indicator" and "index" are used interchangably. 
+
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(dev = 'pdf')
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# --- 0. Setup
+# install.packages("GGally")
+
+library(tidyverse)
+library(foreign) 
+library(dplyr)
+library(Compind)
+library(xtable)
+library(ggplot2)
+library(GGally)
+library(Hmisc)
+library(ggcorrplot)
+library(knitr)
+
+```
+
+### Data
+
+The processed data for modelling includes 20 variables and 28 observatons.   
+Note: North Korea is removed from the analysis for now, as data points of core variables for this country (such as the GDP) were missing. 
+
+```{r data import, include=TRUE}
+CPI <- readRDS("../../data/data_for_modelling/CPI_2020.rds") %>%
+  filter(country != "North Korea") # remove North Korea for now because of missing information
+```
+
+## Correlation matrix
+
+The matrix below shows the correlation between the cyber power indicators.  
+Please refer to the codebook for a description of the indicators. 
+
+```{r corr matrix, include=TRUE}
+CPI.cor <- cor(CPI[, -1], method = c("pearson")) 
+CPI.rcorr <- rcorr(as.matrix(CPI[, -1]), type = c("pearson"))
+CPI.coeff = CPI.rcorr$r
+CPI.p = CPI.rcorr$P
+# summary(CPI.coeff)
+kable(CPI.cor [1:14,1:14], digits = 2)
+```
+
+
+Below a visualization of the correlation matrix.  
+The correlation among the following variables is pretty high:  
+
+  * "Tech exports" and "Freedom of Net"  
+  * "Critical infrastructre" and "Removal from Google"  
+Note: The variable "state attack" is difficult to interpret as we have a lot of zeros.  
+
+```{r plot corr, include=TRUE}
+ggcorr(CPI[, -1], method = c("pairwise", "pearson"), label=T, hjust = 0.75, size = 3, color = "grey50")
+
+```
+
+## Normalization
+
+The compind package uses three normalization methods:
+
+  * 1 = standardization or z-scores
+  * 2 = Min-max method
+  * 3 = Ranking method. If polarity="POS" ranking is increasing, while if polarity="NEG" ranking is decreasing    
+
+
+For now, we have used the default (1) z-scores. 
+Removal from google points to the negative direction, all other indicators point to the positive direction.  
+Note: this is still a point of discussion, as we are not sure that the polarity of the indicators is correct.  
+
+```{r normal, include=TRUE}
+data_norm = normalise_ci(CPI,c(3, 5, 6:14),c("POS","POS","NEG","POS","POS","POS","POS","POS","POS","POS","POS"),method=1,z.mean=0, z.std=1)
+summary(data_norm$ci_norm)
+```
+
+## Aggregation
+
+The compind package lists many different methods to choose from. We explored three methods:   
+
+  * Benefit of the Doubt approach   
+  * Factor analysis   
+  * Min-Max   
+
+Other methods methods worth considering are: 
+
+  * Generalized mean    
+  * Weighting method based on geometric aggregation   
+  * Mazziotta-Pareto Index (MPI) method   
+  * Wroclaw Taxonomic Method    
+
+Factor analysis and Min-Max yield to the best results.   
+Note: we still have to decide which one to choose and whether or not it is worth exploring additional aggregation methods. 
+
+### Benefit of the Doubt approach  
+
+```{r BoD, include=TRUE}
+CI1 = ci_bod(data_norm$ci_norm,c(1:11))
+CPI_CI = data.frame(CPI, CI1_est= CI1$ci_bod_est)
+```
+
+```{r BoD plot, echo=FALSE}
+ggplot(data = CPI_CI, aes(x = skilled_employees, y = tech_exports, label = CPI_CI$country)) +
+  geom_point(aes(colour = CI1_est),size=3) + geom_text(aes(colour = CI1_est), hjust = -0.10, nudge_x = 0.05, check_overlap = T)
+```
+
+### Factor analysis
+
+```{r factor, include=T}
+CI2 = ci_factor(data_norm$ci_norm,c(1:11),method="CH", dim=3)
+summ = summary(as.data.frame(CI2$ci_factor_est))
+CPI_CI <- data.frame(CPI_CI, CI2_est= CI2$ci_factor_est)
+```
+
+```{r factor plot, echo=F}
+ggplot(data = CPI_CI, aes(x = skilled_employees, y = tech_exports, label = CPI_CI$country)) +
+  geom_point(aes(colour = CI2_est),size=3) + geom_text(aes(colour = CI2_est), hjust = -0.10, nudge_x = 0.05, check_overlap = T)
+```
+
+### Min-Max
+
+```{r min max, include=T}
+CI3 = ci_mean_min(data_norm$ci_norm, alpha=0.5, beta=1)
+CPI_CI <- data.frame(CPI_CI, CI3_est= CI3$ci_mean_min_est)
+```
+
+```{r min max plot, echo=F}
+ggplot(data = CPI_CI, aes(x = skilled_employees, y = tech_exports, label = CPI_CI$country)) +
+  geom_point(aes(colour = CI3_est),size=3) + geom_text(aes(colour = CI3_est), hjust = -0.10, nudge_x = 0.05, check_overlap = T)
+```
+
+## Sensitivity analysis
+
+Finally, we run a sensitivity analysis with the three cyber power composite indicators created above.   
+
+* CI1_est: indicator based on the Benefit of the doubt approach   
+* CI2_est: indicator based on factor analysis   
+* CI2_est: indicator based on min-max approach      
+
+The  matrix below shows the correlation between the three cyber power composite indicators computed before, the GDP per capita and the ITU cyber index.  
+Note: we expect that our index correlates fairly highly with GDP per capita and the ITU cyber index  
+Note: we are still brainstorming additional analyses we should run to check the robustness of our cyber power index, such as:  
+  * detect outliers of CI
+  * estimate the Kernel distribution of CI
+  
+```{r sens, echo=F}
+ggcorr(CPI_CI[, c("GDPexp_capita","itu_2018", "CI1_est", "CI2_est", "CI3_est")], method = c("pairwise", "pearson"), label=T, hjust = 0.75, size = 3, color = "grey50")
+```
+
+
+
+
+

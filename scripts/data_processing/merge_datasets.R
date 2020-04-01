@@ -38,11 +38,16 @@ CPI_PENN_ITU <- left_join(CPI_PENN, ITU, by = c("consolidated_country"))
 
 # --- then we merge QoG_cs to CPI_PENN_ITU:
 # to reoder columns in dataframe: http://www.datasciencemadesimple.com/re-arrange-re-order-column-dataframe-r-using-dplyr/
-CPI_PENN_ITU_QoG_cs <- left_join(CPI_PENN_ITU, QoG_cs, by = c("consolidated_country")) 
+# CPI_PENN_ITU_QoG_cs <- left_join(CPI_PENN_ITU, QoG_cs, by = c("consolidated_country")) 
 
-CPI_2020 <- CPI_PENN_ITU_QoG_cs %>%
+CPI_2020 <- CPI_PENN_ITU %>%
   rename(country = consolidated_country) %>%
-  select(country, everything()) %>%     # reorder columns so that country is first column
+  mutate(ecommerce_capita = ecommerce/pop, patent_app_capita= patent_application/pop) %>%
+  select(country, ecommerce, ecommerce_capita, patent_application, patent_app_capita, 
+         removal_google,freedom_net, infocomm_imp,
+         tech_exports, skilled_employees, internet_use, cyber_prepared,
+         bilat_agreement, critical_infrastructure, state_attacks,
+         everything()) %>%     # reorder columns so that country is first column 
   select(-year)
 
 # --- 5. Saving 
