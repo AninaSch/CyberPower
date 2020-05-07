@@ -40,17 +40,29 @@ CPI_PENN_ITU <- left_join(CPI_PENN, ITU, by = c("consolidated_country"))
 # to reoder columns in dataframe: http://www.datasciencemadesimple.com/re-arrange-re-order-column-dataframe-r-using-dplyr/
 # CPI_PENN_ITU_QoG_cs <- left_join(CPI_PENN_ITU, QoG_cs, by = c("consolidated_country")) 
 
-CPI_2020 <- CPI_PENN_ITU %>%
+CPI_2020_all <- CPI_PENN_ITU %>%
   rename(country = consolidated_country) %>%
   mutate(ecommerce_capita = ecommerce/pop, patent_app_capita= patent_application/pop) %>%
-  select(country, ecommerce, ecommerce_capita, patent_application, patent_app_capita, 
-         removal_google,freedom_net, infocomm_imp,
-         tech_exports, skilled_employees, internet_use, cyber_prepared,
-         bilat_agreement, critical_infrastructure, state_attacks,
+  select(country, laws, web_alexa, news_alexa, removal_google, freedom_net, freedom_press, 
+         infocomm_imp,patent_application, patent_app_capita, broadband_speed, mobile_speed, ecommerce, ecommerce_capita,   
+         int_agreement,state_attack, attack_objective, tech_firm, tech_export, human_capital, cybermil_people,cyber_firm, computer_infection,
+         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, itu_2018,
+         everything()) %>%     # reorder columns so that country is first column 
+  select(-year)
+
+CPI_2020_obj <- CPI_PENN_ITU %>%
+  rename(country = consolidated_country) %>%
+  mutate(ecommerce_capita = ecommerce/pop, patent_app_capita= patent_application/pop) %>%
+  select(country, laws, web_alexa, news_alexa, removal_google, freedom_net, freedom_press, 
+         infocomm_imp,patent_application, patent_app_capita, broadband_speed, mobile_speed, ecommerce, ecommerce_capita,int_agreement,
+         state_attack, attack_objective, attack_surveillance, attack_manipulation, attack_intelligence, attack_commercial, attack_disruption,
+         tech_firm, tech_export, human_capital, cybermil_people,cyber_firm, computer_infection,
+         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, military_strategy, itu_2018,
          everything()) %>%     # reorder columns so that country is first column 
   select(-year)
 
 # --- 5. Saving 
-saveRDS(CPI_2020, file = "../../data/data_for_modelling/CPI_2020.rds")
+saveRDS(CPI_2020_all, file = "../../data/data_for_modelling/CPI_2020_all.rds")
 
+saveRDS(CPI_2020_obj, file = "../../data/data_for_modelling/CPI_2020_obj.rds")
 

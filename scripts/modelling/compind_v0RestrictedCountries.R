@@ -1,4 +1,6 @@
 # This script normalizes the cyber power variables and produces an aggregated cyber power measure using the package "compind"
+### with restricted number of countries (data= march18)
+
 
 rm(list=ls())
 # options(stringsAsFactors=FALSE, digits=3)
