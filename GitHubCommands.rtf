@@ -1,0 +1,105 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf610
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Consolas;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red27\green29\blue31;\red235\green236\blue237;
+}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c14118\c15294\c16078;\cssrgb\c93725\c94118\c94510;
+}
+\paperw11900\paperh16840\margl1440\margr1440\vieww17360\viewh15660\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs22 \cf2 \
+GITHUB COMMANDS\
+(reference guide: https://github.com/codepath/ios_guides/wiki/Using-Git-with-Terminal)\
+\
+\
+\
+
+\b OPEN TERMINAL\
+
+\b0 \
+\pard\pardeftab720\partightenfactor0
+\cf2 Open up terminal, cmd + space "terminal".\
+\
+\ul How to commit files from an existing repository\
+\ulnone \
+
+\b FIRST STEP: CD\
+
+\b0 \
+pwd Figure out which directory you are currently in by "Printing the Working Directory".\
+\
+ls List the directories and files inside the current directory.\
+	ls -a include hidden files in the list of directories and files. This is helpful when trying to\
+	find hidden files like .git or .gitignore\
+\
+cd [folder] Go into the folder. e.g. cd Desktop/Developer\
+	cd This by itself will navigate all the way out to your Home Directory\
+	cd .. Back out to the parent directory of the current directory.\
+\
+open [file] Same as "double-clicking" a file or folder in finder.\
+	open . Opens the current folder or file in finder or it's default application.\
+clear When you need a fresh Terminal window\
+\
+Hint If you can't find the path to a file or folder through terminal, search for it using Finder, then drag\
+the file or folder right into your terminal window! If you are trying to change to that directory, you will\
+need to type cd before dragging in the folder.\
+\
+\
+
+\b SECOND STEP: STATUS\
+
+\b0 \
+Check for any changes that have been made to files since your last commit\
+\
+	git status\
+\
+\
+\
+
+\b THIRD STEP: ADD FILES\
+
+\b0 \
+Stage any files with changes you'd like to commit\
+\
+	git add [filepath] # This adds an individual file\
+	git add . # This adds all files with changes\
+\
+git status\
+\
+\
+
+\b FOURTH STEP: COMMIT FILES TO LOCAL GIT\
+
+\b0 Apply the changes to your local Git repository with a message briefly outlining the changes you\
+made.\
+\
+git commit -m "Here is my commit message"\
+\
+\
+
+\b FIFTH SEPT: LINK TO REMOTE REPOSITORY\
+
+\b0 \
+HTTPS Setup\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf3 \cb4 \expnd0\expndtw0\kerning0
+ git remote rm origin\
+ git remote add origin [https://github.com/AninaSchwarz/CyberPower.git]
+\f0\fs22 \cf2 \cb1 \kerning1\expnd0\expndtw0 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf3 \cb4 \expnd0\expndtw0\kerning0
+https://github.com/AninaSchwarz/CyberPower.git\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs22 \cf2 \cb1 \kerning1\expnd0\expndtw0 \
+	git push origin master\
+	<enter your username at promt>\
+	<enter your password at prompt>\
+\
+\
+\
+}
