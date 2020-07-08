@@ -213,17 +213,18 @@ Nicaragua,Nicaragua
 Niger,Niger
 Nigeria,Nigeria
 Niue,Niue
-Korea North,North Korea
-"Korea, North",North Korea
-North Korea,North Korea
-"Korea, Dem. Rep.",North Korea
-"Korea, Dem. People’s Rep.",North Korea
-DPRK,North Korea
+Korea North,DPRK
+"Korea, North",DPRK
+North Korea,DPRK
+"Korea, Dem. Rep.",DPRK
+"Korea, Dem. People’s Rep.",DPRK
+DPRK,DPRK
 "Korea, Rep.",South Korea
 "Korea, Republic of",South Korea
 South Korea,South Korea
 "Korea, South",South Korea
 ROK,South Korea
+RoK,South Korea
 North Yemen,North Yemen
 Norway,Norway
 Oman,Oman

@@ -25,7 +25,6 @@ PENN <- clean_countries(PENN, path_to_country_dictionary)
 ITU <- clean_countries(ITU, path_to_country_dictionary)
 QoG_cs <- clean_countries(QoG_cs, path_to_country_dictionary)
 
-
 # --- 3. Merging Datasets 
 
 # --- we start by merging CPI to PENN:
@@ -46,7 +45,8 @@ CPI_2020_all <- CPI_PENN_ITU %>%
   select(country, laws, web_alexa, news_alexa, removal_google, freedom_net, freedom_press, 
          infocomm_imp,patent_application, patent_app_capita, broadband_speed, mobile_speed, ecommerce, ecommerce_capita,   
          int_agreement,state_attack, attack_objective, tech_firm, tech_export, human_capital, cybermil_people,cyber_firm, computer_infection,
-         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, itu_2018,
+         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, military_strategy, cyber_command, CERTS,
+         itu_2018,
          everything()) %>%     # reorder columns so that country is first column 
   select(-year)
 
@@ -55,11 +55,12 @@ CPI_2020_obj <- CPI_PENN_ITU %>%
   mutate(ecommerce_capita = ecommerce/pop, patent_app_capita= patent_application/pop) %>%
   select(country, laws, web_alexa, news_alexa, removal_google, freedom_net, freedom_press, 
          infocomm_imp,patent_application, patent_app_capita, broadband_speed, mobile_speed, ecommerce, ecommerce_capita,int_agreement,
-         state_attack, attack_objective, attack_surveillance, attack_manipulation, attack_intelligence, attack_commercial, attack_disruption,
+         state_attack, attack_objective, attack_surveillance, attack_control, attack_intelligence, attack_commercial, attack_offense,
          tech_firm, tech_export, human_capital, cybermil_people,cyber_firm, computer_infection,
-         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, military_strategy, itu_2018,
+         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, military_strategy, cyber_command, CERTS,
+         itu_2018,
          everything()) %>%     # reorder columns so that country is first column 
-  select(-year)
+  select(-year, -itu_2018)
 
 # --- 5. Saving 
 saveRDS(CPI_2020_all, file = "../../data/data_for_modelling/CPI_2020_all.rds")

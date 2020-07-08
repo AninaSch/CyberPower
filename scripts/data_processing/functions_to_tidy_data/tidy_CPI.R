@@ -28,7 +28,7 @@ CPI <- function(path_loadoriginal, path_savetidy){
 #       1. read CPI Data
   print("importing CPI data... ")
   CPI <- rio::import(path_loadoriginal)
-  CPI <- rio::import("../../../data/original_data/CPI/SummaryIndicators_2020May5.xlsx") # for debugging
+  CPI <- rio::import("../../../data/original_data/CPI/SummaryIndicators_2020July1.xlsx") # for debugging
 
   print("importing done")
   
@@ -47,7 +47,6 @@ CPI <- function(path_loadoriginal, path_savetidy){
   CPI_tidy[,'broadband_speed']=round(CPI_tidy[,'broadband_speed'],3)
   CPI_tidy[,'mobile_speed']=round(CPI_tidy[,'mobile_speed'],3)
   CPI_tidy[,'mobile_infection']=round(CPI_tidy[,'mobile_infection'],3)
-  
   
   print("tidying done")
   
