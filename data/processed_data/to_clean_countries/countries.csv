@@ -219,12 +219,12 @@ North Korea,DPRK
 "Korea, Dem. Rep.",DPRK
 "Korea, Dem. People’s Rep.",DPRK
 DPRK,DPRK
-"Korea, Rep.",South Korea
-"Korea, Republic of",South Korea
-South Korea,South Korea
-"Korea, South",South Korea
-ROK,South Korea
-RoK,South Korea
+"Korea, Rep.",ROK
+"Korea, Republic of",ROK
+South Korea,ROK
+"Korea, South",ROK
+ROK,ROK
+RoK,ROK
 North Yemen,North Yemen
 Norway,Norway
 Oman,Oman
@@ -274,8 +274,8 @@ Slovenia,Slovenia
 Solomon Islands,Solomon Islands
 Somalia,Somalia
 South Africa,South Africa
-Korea South,South Korea
-Republic of Korea,South Korea
+Korea South,ROK
+Republic of Korea,ROK
 South Sudan,South Sudan
 South Vietnam,South Vietnam
 South Yemen,South Yemen

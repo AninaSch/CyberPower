@@ -28,7 +28,7 @@ CPI <- function(path_loadoriginal, path_savetidy){
 #       1. read CPI Data
   print("importing CPI data... ")
   CPI <- rio::import(path_loadoriginal)
-  CPI <- rio::import("../../../data/original_data/CPI/SummaryIndicators_2020July1.xlsx") # for debugging
+  CPI <- rio::import("../../../data/original_data/CPI/SummaryIndicators_2020July29.xlsx") # for debugging
 
   print("importing done")
   

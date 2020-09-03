@@ -181,7 +181,7 @@ p <- ggplot(tmp) +
 # geom_text(data=base_data, aes(x = title, y = -18, label=country), hjust=c(1,1,0,0), colour = "black", alpha=0.8, size=4, fontface="bold", inherit.aes = FALSE)
 
 # Save at png
-ggsave(p, file = "../../findings/Intent_Index.pdf", width=10, height=10)
+ggsave(p, file = "../../findings/Intent_Index.eps", width=15, height=10, device=cairo_ps)
 
 #### ------------------------------------ BAR PLOTS INTENT  --------------------
 
@@ -303,7 +303,7 @@ library(patchwork)
 final <-  (p_avg | p_surveillance | p_defense | p_control) / (p_intelligence | p_commerce | p_offense | p_norms)
 # p_avg + p_norms + p_surveillance
 
-ggsave(final, file = "../../findings/Intent_Index_Objectives.pdf")
+ggsave(final, file = "../../findings/Intent_Index_Objectives.eps", width = 20, height = 12)
 
 
 

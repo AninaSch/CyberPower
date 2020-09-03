@@ -36,23 +36,23 @@ CPI_scores <- readRDS("../../data/data_for_modelling/CPI_scores.rds")
   #                                 score_commercial, score_offense, score_norms), na.rm = TRUE ))
 
 cor(CPI_scores$broadband_speed, CPI_scores$internet_use, use = "complete.obs")
-
-# UPDATE
-
-surveillance <- CPI_scores %>%
-  select(country,laws, attack_surveillance, freedom_net, surveillance_firm, socials_use, internet_use)
-defense <- CPI_scores %>%
-  select(country, laws, shodan,  human_capital, cyber_firm, computer_infection, mobile_infection, internet_use, broadband_speed, mobile_speed, infocomm_imp, CERTS)
-control <- CPI_scores %>%
-  select(country, attack_control, internet_use, socials_use, news_alexa, web_alexa, removal_google)
-intelligence <- CPI_scores %>%
-  select(country, attack_intelligence, tech_export, human_capital, cybermil_people, tech_firm, surveillance_firm)
-commercial <- CPI_scores %>%
-  select(country, attack_commercial, tech_firm, human_capital, cyber_firm, web_alexa, ecommerce_capita, tech_export, infocomm_imp, patent_app_capita)
-offense <- CPI_scores %>%
-  select(country, attack_offense, tech_export, cybermil_people, military_strategy, cyber_command)
-norms <- CPI_scores %>%
-  select(country, laws, int_agreement, infocomm_imp, tech_firm, tech_export)
+# 
+# # UPDATE
+# 
+# surveillance <- CPI_scores %>%
+#   select(country,laws, attack_surveillance, freedom_net, surveillance_firm, socials_use, internet_use)
+# defense <- CPI_scores %>%
+#   select(country, laws, shodan,  human_capital, cyber_firm, computer_infection, mobile_infection, internet_use, broadband_speed, mobile_speed, infocomm_imp, CERTS)
+# control <- CPI_scores %>%
+#   select(country, attack_control, internet_use, socials_use, news_alexa, web_alexa, removal_google)
+# intelligence <- CPI_scores %>%
+#   select(country, attack_intelligence, tech_export, human_capital, cybermil_people, tech_firm, surveillance_firm)
+# commercial <- CPI_scores %>%
+#   select(country, attack_commercial, tech_firm, human_capital, cyber_firm, web_alexa, ecommerce_capita, tech_export, infocomm_imp, patent_app_capita)
+# offense <- CPI_scores %>%
+#   select(country, attack_offense, tech_export, cybermil_people, military_strategy, cyber_command)
+# norms <- CPI_scores %>%
+#   select(country, laws, int_agreement, infocomm_imp, tech_firm, tech_export)
 
 # -------------- THEME
 
@@ -156,7 +156,7 @@ corr_ITU <- ggplot(data = CPI_scores, aes(x = score_capint, y = ITU, label = CPI
   ggtitle("") +
   labs(x = "National Cyber Power Index (NCPI)" , y = "ITU Cyber Index") 
 
-ggsave(corr_ITU, file = "../../findings/Corr_NCPI_ITU.pdf")
+ggsave(corr_ITU, file = "../../findings/Corr_NCPI_ITU.eps" , width = 15, height = 12)
 
 
 # CORR PLOT "Correlation between Belfer Cyber Index and GDP per capita"
@@ -166,7 +166,7 @@ corr_GDP <-ggplot(data = CPI_scores, aes(x = score_capint, y = GDPexp_capita, la
   ggtitle("") +
   labs(x = "National Cyber Power Index (NCPI)" , y = "GDP per capita (in USD)") 
 
-ggsave(corr_GDP, file = "../../findings/Corr_NCPI_GDP.pdf")
+ggsave(corr_GDP, file = "../../findings/Corr_NCPI_GDP.eps" , width = 15, height = 12)
 
 
 # ggplot(data = CPI_scores, aes(x = score_capabilities, y = itu_2018, label = CPI_scores$country)) +
@@ -194,7 +194,14 @@ p_capint <- ggplot(data = capint, aes(x = country, y = score_capint)) +
     axis.text.y=element_text(colour="black", size = 15)
   ) 
 
-ggsave(p_capint, file = "../../findings/National_Cyber_Power_Index.pdf")
+ggsave(p_capint, file = "../../findings/National_Cyber_Power_Index.eps" , width = 15, height = 12)
+
+# ggsave(p_capint, file = "../../findings/National_Cyber_Power_Index.jpg" , width = 15, height = 12)
+# ggsave(p_capint, file = "../../findings/National_Cyber_Power_Index.png" , width = 15, height = 12)
+# ggsave(p_capint, file = "../../findings/National_Cyber_Power_Index.eps" , width = 15, height = 12)
+
+
+
 
 
 #### ------------------------------------ BAR PLOTS CAPABILITY * INTENT  --------------------
@@ -332,7 +339,7 @@ library(patchwork)
 
 final <- (p_avg | p_surveillance | p_defense | p_control) / (p_intelligence | p_commerce | p_offense | p_norms)
 
-ggsave(final, file = "../../findings/National_Cyber_Power_Index_Objectives.pdf")
+ggsave(final, file = "../../findings/National_Cyber_Power_Index_Objectives.eps" , width = 20, height = 12)
 
 # ggsave(p, file="output.png", width=10, height=10)
 
@@ -395,7 +402,7 @@ p_quad <- CPI_quadrant %>%
             annotate("text", x=10, y=0.05, label= "Lower Capability &\n Lower Intent", size=6, color="#ed1b34", fontface = 'bold')  +
             guides(color = FALSE) 
 
-ggsave(p_quad, file = "../../findings/Quad_Cap_Intent.pdf")
+ggsave(p_quad, file = "../../findings/Quad_Cap_Intent.eps", width = 15, height = 12)
 
 
 #### FUNCTION
@@ -460,7 +467,7 @@ quadrant = "quandrant"
 
 p_quad_surveillance <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
-ggsave(p_quad_surveillance, file = "../../findings/Quad_Cap_Intent_surveillance.pdf", width = 17, height = 12, device='pdf')
+ggsave(p_quad_surveillance, file = "../../findings/Quad_Cap_Intent_surveillance.eps", width = 17, height = 12, device='eps')
 
 # ggsave(p_quad_surveillance, file = "../../findings/Quad_Cap_Intent_surveillance.png", width = 17, height = 12, dpi = 150, units = "cm", device='png')
 
@@ -476,7 +483,7 @@ quadrant = "quandrant"
 
 p_quad_defense <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
-ggsave(p_quad_defense, file = "../../findings/Quad_Cap_Intent_defense.pdf", width = 17, height = 12)
+ggsave(p_quad_defense, file = "../../findings/Quad_Cap_Intent_defense.eps", width = 17, height = 12)
 
 
 #### INFORMATION CONTROL
@@ -491,7 +498,7 @@ my_palette <- c("#4db848", "#fcb315", "#ed1b34")
 
 p_quad_control <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
-ggsave(p_quad_control, file = "../../findings/Quad_Cap_Intent_control.pdf")
+ggsave(p_quad_control, file = "../../findings/Quad_Cap_Intent_control.eps", width = 17, height = 12)
 
 
 #### INTELLIGENCE
@@ -507,7 +514,7 @@ my_palette <- c( "#4db848", "#4e88c7", "#fcb315", "#ed1b34")
 p_quad_intel <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
 
-ggsave(p_quad_intel, file = "../../findings/Quad_Cap_Intent_intel.pdf")
+ggsave(p_quad_intel, file = "../../findings/Quad_Cap_Intent_intel.eps", width = 17, height = 12)
 
 
 #### COMMERCE
@@ -522,7 +529,7 @@ my_palette <- c( "#4e88c7", "#fcb315", "#ed1b34")
 
 p_quad_commerce <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
-ggsave(p_quad_commerce, file = "../../findings/Quad_Cap_Intent_commerce.pdf")
+ggsave(p_quad_commerce, file = "../../findings/Quad_Cap_Intent_commerce.eps", width = 17, height = 12)
 
 
 #### OFFENSE
@@ -537,7 +544,7 @@ my_palette <- c( "#4db848", "#4e88c7", "#fcb315", "#ed1b34")
 
 p_quad_offense <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
-ggsave(p_quad_offense, file = "../../findings/Quad_Cap_Intent_offense.pdf")
+ggsave(p_quad_offense, file = "../../findings/Quad_Cap_Intent_offense.eps" , width = 17, height = 12)
 
 
 #### NORMS
@@ -552,7 +559,7 @@ my_palette <- c("#4db848", "#fcb315", "#ed1b34")
 
 p_quad_norms <- CPI_quadrant %>%  intent_times_capab(capabilities, intent, labs_x, labs_y, label, quadrant)
 
-ggsave(p_quad_norms, file = "../../findings/Quad_Cap_Intent_norms.pdf")
+ggsave(p_quad_norms, file = "../../findings/Quad_Cap_Intent_norms.eps", width = 17, height = 12)
 
 # 
 # # Bring together on one page

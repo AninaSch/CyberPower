@@ -5,6 +5,10 @@
 #   https://www.researchgate.net/post/How_to_check_statistically_whether_two_or_more_variables_can_be_combined_into_one_derived_variable
 
 rm(list=ls())
+# 
+# setEPS()
+# postscript("whatever.eps")
+# https://stackoverflow.com/questions/4001316/how-do-i-preserve-transparency-in-ggplot2
 
 # --- 0. Setup
 # install.packages("GGally")
@@ -39,21 +43,21 @@ CPI_scores <- readRDS("../../data/data_for_modelling/CPI_scores.rds")
 cor(CPI_scores$broadband_speed, CPI_scores$internet_use, use = "complete.obs")
 
 # UPDATE
-
-surveillance <- CPI_scores %>%
-  select(country,laws, attack_surveillance, freedom_net, surveillance_firm, socials_use, internet_use)
-defense <- CPI_scores %>%
-  select(country, laws, shodan,  human_capital, cyber_firm, computer_infection, mobile_infection, internet_use, broadband_speed, mobile_speed, infocomm_imp, CERTS)
-control <- CPI_scores %>%
-  select(country, attack_control, internet_use, socials_use, news_alexa, web_alexa, removal_google)
-intelligence <- CPI_scores %>%
-  select(country, attack_intelligence, tech_export, human_capital, cybermil_people, tech_firm, surveillance_firm)
-commercial <- CPI_scores %>%
-  select(country, attack_commercial, tech_firm, human_capital, cyber_firm, web_alexa, ecommerce_capita, tech_export, infocomm_imp, patent_app_capita)
-offense <- CPI_scores %>%
-  select(country, attack_offense, tech_export, cybermil_people, military_strategy, cyber_command)
-norms <- CPI_scores %>%
-  select(country, laws, int_agreement, infocomm_imp, tech_firm, tech_export)
+# 
+# surveillance <- CPI_scores %>%
+#   select(country,laws, attack_surveillance, freedom_net, surveillance_firm, socials_use, internet_use)
+# defense <- CPI_scores %>%
+#   select(country, laws, shodan,  human_capital, cyber_firm, computer_infection, mobile_infection, internet_use, broadband_speed, mobile_speed, infocomm_imp, CERTS)
+# control <- CPI_scores %>%
+#   select(country, attack_control, internet_use, socials_use, news_alexa, web_alexa, removal_google)
+# intelligence <- CPI_scores %>%
+#   select(country, attack_intelligence, tech_export, human_capital, cybermil_people, tech_firm, surveillance_firm)
+# commercial <- CPI_scores %>%
+#   select(country, attack_commercial, tech_firm, human_capital, cyber_firm, web_alexa, ecommerce_capita, tech_export, infocomm_imp, patent_app_capita)
+# offense <- CPI_scores %>%
+#   select(country, attack_offense, tech_export, cybermil_people, military_strategy, cyber_command)
+# norms <- CPI_scores %>%
+#   select(country, laws, int_agreement, infocomm_imp, tech_firm, tech_export)
 
 # -------------- THEME
 
@@ -156,7 +160,7 @@ scatterITU <- ggplot(data = CPI_scores, aes(x = score_capabilities, y = ITU, lab
   ggtitle("") +
   labs(x = "Capability Index" , y = "ITU Cyber Index") 
 
-ggsave(scatterITU, file = "../../findings/Scatter_ITU.pdf")
+ggsave(scatterITU, file = "../../findings/Scatter_ITU.eps", width = 15, height = 12)
 
 
 # CORR PLOT "Correlation between Belfer Cyber Index and GDP per capita"
@@ -166,7 +170,7 @@ scatterGDP <- ggplot(data = CPI_scores, aes(x = score_capabilities, y = GDPexp_c
   ggtitle("") +
   labs(x = "Capability Index" , y = "GDP per capita") 
 
-ggsave(scatterGDP, file = "../../findings/Scatter_GDP.pdf")
+ggsave(scatterGDP, file = "../../findings/Scatter_GDP.eps", width = 15, height = 12)
 
 
 # ggplot(data = CPI_scores, aes(x = score_capabilities, y = itu_2018, label = CPI_scores$country)) +
@@ -176,7 +180,7 @@ ggsave(scatterGDP, file = "../../findings/Scatter_GDP.pdf")
 
 # -------------- VISUALIZATION - LOLLIPOP SCORES
 
-#  OVERALL CAPABILITY SCORE
+# OVERALL CAPABILITY SCORE
 capabilities <- CPI_scores %>% ungroup(country) %>%
   select(country, score_capabilities) %>% mutate(country = fct_reorder(country, score_capabilities)) %>% arrange(-score_capabilities)
 p_capabilities <- ggplot(data = capabilities, aes(x = country, y = score_capabilities)) +
@@ -196,7 +200,31 @@ p_capabilities <- ggplot(data = capabilities, aes(x = country, y = score_capabil
     axis.text.y=element_text(colour="black", size = 15)
   ) 
 
-ggsave(p_capabilities, file = "../../findings/Capabilities_Index.pdf")
+ggsave(p_capabilities, file = "../../findings/Capabilities_Index.eps" , width = 15, height = 12)
+
+# EQUALLY WEIGHTED CAPABILITY SCORE 
+
+capabilities_equal <- CPI_scores %>% ungroup(country) %>%
+  select(country, score_overall) %>% mutate(country = fct_reorder(country, score_overall)) %>% arrange(-score_overall)
+p_capabilities_equal <- ggplot(data = capabilities_equal, aes(x = country, y = score_overall)) +
+  geom_point(size =3, color = "#A51C30") +
+  geom_segment(aes(xend = country, y = 0, yend = score_overall)) +
+  xlab("") +
+  ylab("Capability Score") +
+  ggtitle(" ") +
+  coord_flip() +
+  crimson_theme() +
+  theme_minimal() + 
+  scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0,103), expand = c(0,0)) +
+  theme(
+    # plot.title = element_text(size = 20, face = "bold"),
+    axis.text.x = element_text(colour="black", size = 12),
+    axis.title.x=element_text(colour="black", size = 15), #, face = "bold") ,
+    axis.text.y=element_text(colour="black", size = 15)
+  ) 
+
+ggsave(p_capabilities_equal, file = "../../findings/CapabilitiesEqualWeight_Index.eps" , width = 15, height = 12)
+
 
 # -------------- VISUALIZATION - RADARCHART CAPABILITIES
 # https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/stars.html
@@ -243,9 +271,10 @@ all <- CPI_scores %>%
   ungroup(country) %>%
   select(country, Surveillance = score_surveillance, Defense = score_defense, `Information\nControl` = score_control, 
          Intel = score_intelligence, Commerce = score_commercial, Offense = score_offense, Norms = score_norms) %>%
-  filter(country == "Australia" | country == "Brazil" | country == "Canada" | country == "China" | country == "Egypt" | country == "Estonia" |
-           country == "France" | country == "Germany" | country == "India" | country == "Israel" | country == "Italy" | country == "Japan" | 
-           country == "Lithuania" | country == "Malaysia" | country == "Netherlands" ) %>%
+  # filter(country == "Australia" | country == "Brazil" | country == "Canada" | country == "China" | country== "DPRK"| country == "Egypt" |
+  filter(country == "Australia" | country == "Brazil" | country == "Canada" | country == "China" |  country == "Egypt" |
+           country == "Estonia" |country == "France" | country == "Germany" | country == "India" | country == "Iran" | country == "Israel" | 
+           country == "Italy" | country == "Japan" | country == "Lithuania" | country == "Malaysia"  ) %>%
   select (-country)
 
 all <- rbind(rep(100,10) , rep(0,10) , all)
@@ -256,8 +285,9 @@ all <- rbind(rep(100,10) , rep(0,10) , all)
 # colors_in=colormap(colormap=colormaps$viridis, nshades=15, alpha=0.3)
 
 # Prepare title
-mytitle <- c("Australia\n",  "Brazil\n",  "Canada\n", "China\n", "Egypt\n", "Estonia\n", "France\n","Germany\n", "India\n", 
-             "Israel\n", "Italy\n", "Japan\n","Lithuania\n", "Malaysia\n" , "Netherlands\n"  )
+mytitle <- c("Australia\n",  "Brazil\n",  "Canada\n", "China\n","Egypt\n", 
+             "Estonia\n", "France\n","Germany\n", "India\n", "Iran\n","Israel\n", 
+             "Italy\n", "Japan\n","Lithuania\n" , "Malaysia\n" )
 
 # Split the screen in 6 parts
 par(mfrow=c(5,3))
@@ -286,16 +316,20 @@ radar1 <- for(i in 1:15){
   )
 }
 
-ggsave(radar1, file = "../../findings/Capabilities_Radar1.pdf")
+ggsave(radar1, file = "../../findings/Capabilities_Radar1.eps", device=cairo_ps)
+
+# ggsave(radar1, file = "../../findings/Capabilities_Radar1.eps")
+
+
 
 # 15 PLOTS 
 all <- CPI_scores %>%
   ungroup(country) %>%
   select(country, Surveillance = score_surveillance, Defense = score_defense, `Information\nControl` = score_control, 
          Intel = score_intelligence, Commerce = score_commercial, Offense = score_offense, Norms = score_norms) %>%
-  filter(country == "Russia" | country == "Saudi Arabia" | country == "Singapore" | country == "South Korea" | country == "Spain" | country == "Sweden" |
-           country == "Switzerland" | country == "Turkey" | country == "Ukraine" | country == "United Kingdom"
-         | country == "United States" | country == "Vietnam") %>%
+  filter( country == "Netherlands"| country == "New Zealand"| country == "ROK"| country == "Russia" | country == "Saudi Arabia" | 
+            country == "Singapore" | country == "Spain" | country == "Sweden" | country == "Switzerland" | country == "Turkey" | country == "Ukraine" | 
+            country == "United Kingdom" | country == "United States" | country == "Vietnam") %>%
   select (-country)
 
 
@@ -306,8 +340,9 @@ all <- rbind(rep(100,10) , rep(0,10) , all)
 # colors_in=colormap(colormap=colormaps$viridis, nshades=15, alpha=0.3)
 
 # Prepare title
-mytitle <- c("Russia\n",  "Saudi Arabia\n",  "Singapore\n", "South Korea\n", "Spain\n", "Sweden\n", 
-             "Switzerland\n","Turkey\n", "Ukraine\n", "United Kingdom\n", "United States\n", "Vietnam\n")
+mytitle <- c( "Netherlands\n" , "New Zealand\n", "ROK\n", "Russia\n",  "Saudi Arabia\n", 
+             "Singapore\n",  "Spain\n", "Sweden\n", "Switzerland\n","Turkey\n", "Ukraine\n", 
+             "United Kingdom\n", "United States\n", "Vietnam\n")
 
 # Split the screen in 6 parts
 par(mfrow=c(5,3))
@@ -319,8 +354,11 @@ par(mar=c(2,2,2,2))
 
 
 # Loop for each plot
-radar2 <-  for(i in 1:12){
+# radar2 <-  for(i in 1:15){
+radar2 <-  
   
+  for(i in 1:14){
+    
   # Custom the radarChart !
   radarchart( all[c(1,2,i+2),], axistype=1, 
               
@@ -336,7 +374,7 @@ radar2 <-  for(i in 1:12){
   )
 }
 
-ggsave(radar2, file = "../../findings/Capabilities_Radar2.pdf")
+ggsave(radar2, file = "../../findings/Capabilities_Radar2.eps")
 
 
 #### ------------------------------------ BAR PLOTS CAPABILITY  --------------------
@@ -469,7 +507,7 @@ library(patchwork)
 
 final <- (p_avg | p_surveillance | p_defense | p_control) / (p_intelligence | p_commerce | p_offense | p_norms)
 
-ggsave(final, file = "../../findings/Capabilities_Index_Objectives.pdf")
+ggsave(final, file = "../../findings/Capabilities_Index_Objectives.eps", width = 17, height = 12)
 
 
 

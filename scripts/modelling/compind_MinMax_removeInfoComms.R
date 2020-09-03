@@ -35,17 +35,21 @@ library(ggcorrplot)
 
 # -------------- DATA IMPORT
 
-CPI <- readRDS("../../data/data_for_modelling/CPI_2020_obj.rds") %>%
+CPI <- readRDS("../../data/data_for_modelling/CPI_2020.rds")  %>%
   filter(country != "DPRK") # remove North Korea for now because of missing information
 
 CPI_countries <- readRDS("../../data/data_for_modelling/CPI_countries.rds") %>%
   mutate(country=recode(country, "South Korea" = "RoK")) %>%
-  mutate(country=recode(country, "North Korea" = "DPRK")) %>%
+  mutate(country=recode(country, "North Korea" = "DPRK"))  %>%
   filter(country != "DPRK") # remove North Korea for now because of missing information
-
-overall <- readRDS("../../data/data_for_modelling/CPI_2020_all.rds") %>%
-  select(- attack_objective, -ecommerce, -freedom_press, -patent_application) %>%
-  filter(country != "DPRK") # remove North Korea for now because of missing information
+# 
+overall <- readRDS("../../data/data_for_modelling/CPI_2020.rds") %>%
+  select(country, laws, web_alexa, news_alexa, removal_google, freedom_net, 
+        patent_app_capita, broadband_speed, mobile_speed,ecommerce_capita,
+         attack_surveillance, attack_control, attack_intelligence, attack_commercial, attack_offense,
+         tech_firm, tech_export, human_capital, cybermil_people,cyber_firm, computer_infection,
+         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, military_strategy, cyber_command, CERTS, multi_agreement, bilat_agreement, softpower) %>%
+filter(country != "DPRK") # remove North Korea for now because of missing information
 
 # -------------- SUBSET DATA
 
@@ -63,10 +67,9 @@ commercial <- CPI %>%
   select(country, attack_commercial, tech_firm, human_capital, cyber_firm, web_alexa, ecommerce_capita, tech_export, patent_app_capita)
 offense <- CPI %>%
   select(country, attack_offense, tech_export, cybermil_people, military_strategy, cyber_command)
-
 norms <- CPI %>%
   # select(country, laws, muli_agreement, bilat_agreement, infocomm_imp, tech_firm, tech_export, softpower)
-  select(country, laws, muli_agreement, bilat_agreement, tech_firm, tech_export, softpower)
+  select(country, laws, multi_agreement, bilat_agreement, tech_firm, tech_export, softpower)
 
 
 # -------------- NORMALIZATION (MIN MAX)
@@ -78,24 +81,24 @@ norms <- CPI %>%
 # # 3 = Ranking method. If polarity="POS" ranking is increasing, while if polarity="NEG" ranking is decreasing
 
 colnames(CPI) # show column names CPI
-
+# 
 # CPI_overall
-# data_norm = normalise_ci(overall,c(2:27),c("POS","POS","POS","POS","POS","NEG","POS","POS","POS", "POS",
-#                                        "POS","POS","POS","POS","POS","POS","POS","NEG","NEG","POS",
-#                                        "POS","POS","NEG", "POS", "POS", "POS"),
-#                          method=1,z.mean=50, z.std=20) #   method=1,z.mean=50, z.std=10)
-# 
-# CPI_norm <- cbind(CPI_countries$country, data_norm$ci_norm)  %>% # Create a matrix where x, y and z are columns 
-#   rename(country= `CPI_countries$country`)
-# 
-# CPI_overall <- CPI_norm %>% 
-#   gather(key, val, laws:shodan)%>%
-#   group_by(country) %>%
-#   mutate(
-#     sum_norm = sum(val,  na.rm = TRUE),
-#     mean_overall = mean(val,  na.rm = TRUE)
-#   ) %>%
-#   spread(key, val)
+data_norm = normalise_ci(overall,c(2:32),c("POS","POS","POS","POS","POS","POS","POS","POS", "POS",
+                                        "POS","POS","POS","POS","POS","POS","POS","POS","POS", "POS",
+                                        "NEG","NEG","POS","POS","POS","NEG","POS","POS","POS", "POS","POS","POS"),
+                         method=2) #   method=1,z.mean=50, z.std=10)
+
+CPI_norm <- cbind(CPI_countries$country, data_norm$ci_norm)  %>% # Create a matrix where x, y and z are columns
+  rename(country= `CPI_countries$country`)
+
+CPI_overall <- CPI_norm %>%
+   gather(key, val, laws:softpower)%>%
+   group_by(country) %>%
+   mutate(
+     sum_norm = sum(val,  na.rm = TRUE),
+     mean_overall = mean(val,  na.rm = TRUE)
+   ) %>%
+   spread(key, val)
 
 # CPI_surveillance
 data_norm1 = normalise_ci(surveillance,c(2:7),c("POS","POS","POS","POS","POS","POS"),
@@ -213,7 +216,8 @@ CPI_norms <- CPI_norm7 %>%
 
 # summarize(tot = round(sum(value), 1))
 
-CPI_scores_cap = data.frame(CPI, score_surveillance = round(CPI_surveillance$mean_surveillance*100,3),
+CPI_scores_cap = data.frame(CPI, score_overall = round(CPI_overall$mean_overall*100,3),
+                            score_surveillance = round(CPI_surveillance$mean_surveillance*100,3),
                         score_defense = round(CPI_defense$mean_defense*100,3), score_control = round(CPI_control$mean_control*100,3),
                         score_intelligence = round(CPI_intelligence$mean_intelligence*100,3), score_commercial = round(CPI_commercial$mean_commercial*100,3),
                         score_offense = round(CPI_offense$mean_offense*100,3), score_norms = round(CPI_norms$mean_norms*100,3)
@@ -229,7 +233,8 @@ CPI_scores_cap <- CPI_scores_cap %>%
 
  CPI_scores <- CPI_scores_cap %>%
     group_by(country) %>%
-    mutate(capint_surveillance = round(score_surveillance*intent_surveillance, 3),
+    mutate(capint_overall = round(score_overall*score_intent, 3),
+           capint_surveillance = round(score_surveillance*intent_surveillance, 3),
            capint_defense = round(score_defense*intent_defense, 3),
            capint_control = round(score_control*intent_control, 3),
            capint_intelligence = round(score_intelligence*intent_intelligence, 3),

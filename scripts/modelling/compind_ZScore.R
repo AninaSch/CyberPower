@@ -3,6 +3,8 @@
 
 rm(list=ls())
 
+# FOR NOW: CHECKED ONLY OVERALL SCORES
+
 # -------------- OBJECTIVES X CAPABILITIES MAP
 
 # Commercial = Commercial Gain of Enhancing Domestic Industry Growth
@@ -26,17 +28,46 @@ library(GGally)
 library(Hmisc)
 library(ggcorrplot)
 
+# -------------- FUNCTION
+
+crimson_theme <- function() {
+  # font <- "Georgia"   #assign font family up front
+  theme_minimal() %+replace%    #replace elements we want to change
+    theme(
+      # add border 1)
+      panel.border = element_rect(colour = "blue", fill = NA, linetype = 2),
+      # color background 2)
+      panel.background = element_rect(fill = "aliceblue"),
+      # modify grid 3)
+      panel.grid.major.x = element_line(colour = "#A51C30", linetype = 3, size = 0.5),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.y =  element_line(colour = "#A51C30", linetype = 3, size = 0.5),
+      panel.grid.minor.y = element_blank(),
+      axis.title = element_text(size = 15),
+      # modify text, axis and colour 4) and 5)
+      # axis.text = element_text(colour = "black", face = "italic", family = "Times New Roman"),
+      # axis.title = element_text(colour = "black", family = "Times New Roman"),
+      axis.ticks = element_line(colour = "black"),
+      # legend at the bottom 6)
+      legend.position = "bottom"
+    )
+}
+
+
 # -------------- DATA IMPORT
 
-CPI <- readRDS("../../data/data_for_modelling/CPI_2020_obj.rds") %>%
-  filter(country != "North Korea") # remove North Korea for now because of missing information
+CPI <- readRDS("../../data/data_for_modelling/CPI_2020.rds") 
+  # filter(country != "North Korea") # remove North Korea for now because of missing information
 
-CPI_countries <- readRDS("../../data/data_for_modelling/CPI_countries.rds") %>%
-  filter(country != "North Korea") # remove North Korea for now because of missing information
+CPI_countries <- readRDS("../../data/data_for_modelling/CPI_countries.rds") 
+  # filter(country != "North Korea") # remove North Korea for now because of missing information
 
-overall <- readRDS("../../data/data_for_modelling/CPI_2020_all.rds") %>%
-  select(- attack_objective, -ecommerce, -freedom_press, -patent_application) %>%
-  filter(country != "North Korea") # remove North Korea for now because of missing information
+overall <- readRDS("../../data/data_for_modelling/CPI_2020.rds") %>%
+  select(country, web_alexa, news_alexa, removal_google, freedom_net, 
+         patent_app_capita, broadband_speed, mobile_speed,ecommerce_capita,
+         tech_firm, tech_export, human_capital, cybermil_people,cyber_firm, computer_infection,
+         mobile_infection, socials_use, internet_use, surveillance_firm, shodan, military_strategy, cyber_command, CERTS, multi_agreement, bilat_agreement, softpower)
+
 
 # -------------- SUBSET DATA
 
@@ -65,23 +96,110 @@ norms <- CPI %>%
 
 colnames(CPI) # show column names CPI
 
+
+### ### ### ### ### ### 
+
+### --- RUN THIS SECTION
+
 # CPI_overall
-# data_norm = normalise_ci(overall,c(2:27),c("POS","POS","POS","POS","POS","NEG","POS","POS","POS", "POS",
-#                                        "POS","POS","POS","POS","POS","POS","POS","NEG","NEG","POS",
-#                                        "POS","POS","NEG", "POS", "POS", "POS"),
-#                          method=1,z.mean=50, z.std=20) #   method=1,z.mean=50, z.std=10)
-# 
-# CPI_norm <- cbind(CPI_countries$country, data_norm$ci_norm)  %>% # Create a matrix where x, y and z are columns 
-#   rename(country= `CPI_countries$country`)
-# 
-# CPI_overall <- CPI_norm %>% 
-#   gather(key, val, laws:shodan)%>%
-#   group_by(country) %>%
-#   mutate(
-#     sum_norm = sum(val,  na.rm = TRUE),
-#     mean_overall = mean(val,  na.rm = TRUE)
-#   ) %>%
-#   spread(key, val)
+
+
+# Z-score
+
+data_norm = normalise_ci(overall,c(2:26),c("POS","POS", "POS",
+                                           "POS","POS","POS","POS","POS","POS","POS","POS","POS", "POS",
+                                           "NEG","NEG","POS","POS","POS","NEG","POS","POS","POS", "POS","POS","POS"),
+                            method=1,z.mean=50, z.std=20)
+
+CPI_norm <- cbind(CPI_countries$country, data_norm$ci_norm)  %>% # Create a matrix where x, y and z are columns
+  rename(country= `CPI_countries$country`)
+
+CPI_z <- CPI_norm %>%
+  gather(key, val, web_alexa:softpower)%>%
+  group_by(country) %>%
+  mutate(
+    sum_norm = sum(val,  na.rm = TRUE),
+    mean_overall = mean(val,  na.rm = TRUE)
+  ) %>%
+  spread(key, val)
+
+# Min-Max
+
+data_norm = normalise_ci(overall,c(2:26),c("POS","POS", "POS",
+                                           "POS","POS","POS","POS","POS","POS","POS","POS","POS", "POS",
+                                           "NEG","NEG","POS","POS","POS","NEG","POS","POS","POS", "POS","POS","POS"),
+                         method=2)
+
+CPI_norm <- cbind(CPI_countries$country, data_norm$ci_norm)  %>% # Create a matrix where x, y and z are columns
+  rename(country= `CPI_countries$country`)
+
+CPI_minmax <- CPI_norm %>%
+  gather(key, val, web_alexa:softpower)%>%
+  group_by(country) %>%
+  mutate(
+    sum_norm = sum(val,  na.rm = TRUE),
+    mean_overall = mean(val,  na.rm = TRUE)
+  ) %>%
+  spread(key, val)
+
+# Save as dataset
+
+CPI_scores = data.frame(CPI, score_z = round(CPI_z$mean_overall),
+                            score_minmax = round(CPI_minmax$mean_overall*100,3))
+
+
+# Plot Z-score
+
+capabilities_z <- CPI_scores %>% ungroup(country) %>%
+  select(country, score_z) %>% mutate(country = fct_reorder(country, score_z)) %>% arrange(-score_z)
+
+p_capabilities_z <- ggplot(data = capabilities_z, aes(x = country, y = score_z)) +
+  geom_point(size =3, color = "#A51C30") +
+  geom_segment(aes(xend = country, y = 0, yend = score_z)) +
+  xlab("") +
+  ylab("Capability Score") +
+  ggtitle(" ") +
+  coord_flip() +
+  crimson_theme() +
+  theme_minimal() + 
+  scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0,103), expand = c(0,0)) +
+  theme(
+    # plot.title = element_text(size = 20, face = "bold"),
+    axis.text.x = element_text(colour="black", size = 12),
+    axis.title.x=element_text(colour="black", size = 15), #, face = "bold") ,
+    axis.text.y=element_text(colour="black", size = 15)
+  ) 
+
+ggsave(p_capabilities_z, file = "../../findings/CapabilitiesZScores_Index.pdf" , width = 15, height = 12)
+
+# Plot Min Max
+
+capabilities_minmax <- CPI_scores %>% ungroup(country) %>%
+  select(country, score_minmax) %>% mutate(country = fct_reorder(country, score_minmax)) %>% arrange(-score_minmax)
+
+p_capabilities_minmax <- ggplot(data = capabilities_minmax, aes(x = country, y = score_minmax)) +
+  geom_point(size =3, color = "#A51C30") +
+  geom_segment(aes(xend = country, y = 0, yend = score_minmax)) +
+  xlab("") +
+  ylab("Capability Score") +
+  ggtitle(" ") +
+  coord_flip() +
+  crimson_theme() +
+  theme_minimal() + 
+  scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0,103), expand = c(0,0)) +
+  theme(
+    # plot.title = element_text(size = 20, face = "bold"),
+    axis.text.x = element_text(colour="black", size = 12),
+    axis.title.x=element_text(colour="black", size = 15), #, face = "bold") ,
+    axis.text.y=element_text(colour="black", size = 15)
+  ) 
+
+ggsave(p_capabilities_minmax, file = "../../findings/CapabilitiesMinMax_Index.pdf" , width = 15, height = 12)
+
+
+
+### ### ### ### ### ### 
+
 
 # CPI_surveillance
 data_norm1 = normalise_ci(surveillance,c(2:7),c("POS","POS","POS","POS","POS","POS"),
@@ -198,37 +316,44 @@ CPI_norms <- CPI_norm7 %>%
 
 # -------------- COMBINED DATASET
 
-CPI_scores_cap = data.frame(CPI, score_surveillance = CPI_surveillance$mean_surveillance,
+CPI_scores_cap = data.frame(CPI, score_z = round(CPI_z$mean_overall),
+                        score_surveillance = CPI_surveillance$mean_surveillance,
                         score_defense = CPI_defense$mean_defense, score_control = CPI_control$mean_control,
                         score_intelligence = CPI_intelligence$mean_intelligence, score_commercial = CPI_commercial$mean_commercial,
                         score_offense = CPI_offense$mean_offense, score_norms = CPI_norms$mean_norms
                         )
 
-CPI_scores_cap <- CPI_scores_cap %>%
-  group_by(country) %>%
-  mutate(score_capabilities = mean(c(score_surveillance, score_defense, score_control, score_intelligence,
-                                  score_commercial, score_offense, score_norms), na.rm = TRUE ))
 
-CPI_scores <- CPI_scores_cap %>%
-  group_by(country) %>%
-  mutate(capint_surveillance = (score_surveillance*intent_surveillance),
-         capint_defense = (score_defense*intent_defense),
-         capint_control = (score_control*intent_control),
-         capint_intelligence = (score_intelligence*intent_intelligence),
-         capint_commercial = (score_commercial*intent_commercial),
-         capint_offense = (score_offense*intent_offense),
-         capint_norms = (score_norms*intent_norms)
-         ) %>%
-  mutate(score_capint = mean(c(capint_surveillance, capint_defense, capint_control, 
-                                  capint_intelligence, capint_commercial, capint_offense, capint_norms), na.rm = TRUE)) %>%
-  ungroup(country)
+# 
+# CPI_scores_cap <- CPI_scores_cap %>%
+#   group_by(country) %>%
+#   mutate(score_capabilities = mean(c(score_surveillance, score_defense, score_control, score_intelligence,
+#                                   score_commercial, score_offense, score_norms), na.rm = TRUE ))
+# 
+# CPI_scores <- CPI_scores_cap %>%
+#   group_by(country) %>%
+#   mutate(capint_surveillance = (score_surveillance*intent_surveillance),
+#          capint_defense = (score_defense*intent_defense),
+#          capint_control = (score_control*intent_control),
+#          capint_intelligence = (score_intelligence*intent_intelligence),
+#          capint_commercial = (score_commercial*intent_commercial),
+#          capint_offense = (score_offense*intent_offense),
+#          capint_norms = (score_norms*intent_norms)
+#          ) %>%
+#   mutate(score_capint = mean(c(capint_surveillance, capint_defense, capint_control, 
+#                                   capint_intelligence, capint_commercial, capint_offense, capint_norms), na.rm = TRUE)) %>%
+#   ungroup(country)
+# 
+
+# -------------- 
+
 
 
 # -------------- SAVE AND EXPORT DATASET
-
-saveRDS(CPI_scores, file = "../../data/data_for_modelling/CPI_scores.rds")
-
-rio:: export (CPI_scores, file = "../../data/data_for_modelling/CPI_scores.csv")
+# 
+# saveRDS(CPI_scores, file = "../../data/data_for_modelling/CPI_scores_z.rds")
+# 
+# rio:: export (CPI_scores, file = "../../data/data_for_modelling/CPI_scores_z.csv")
 
 
 
