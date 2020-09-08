@@ -7,7 +7,7 @@
 
 # --- 0. Setup
 library(tidyverse)
-# library(foreign) 
+library(foreign)
 
 source("functions/clean_countries.R") # function to clean country names
 
@@ -72,6 +72,10 @@ saveRDS(CPI_2020, file = "../../data/data_for_modelling/CPI_2020.rds")
 # Save in stata format
 # CPI_2020 <- readRDS("../../data/data_for_modelling/CPI_2020.rds")
 write.dta(CPI_2020,  file = "../../data/data_for_modelling/CPI_2020.dta") 
+
+# Save in csv format
+write.csv(CPI_2020,  file = "../../data/data_for_modelling/CPI_2020.csv") 
+
 
 
 
