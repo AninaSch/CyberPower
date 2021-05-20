@@ -1,2 +1,0 @@
-load("/Users/schwarze/Documents/GitHub/CyberPower/data/data_for_modelling/CPI_2020.rds")
-load("/Users/schwarze/Documents/GitHub/CyberPower/data/data_for_modelling/CPI_countries.rds")
